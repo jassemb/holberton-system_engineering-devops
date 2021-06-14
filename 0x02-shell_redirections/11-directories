@@ -1,2 +1,2 @@
 #!/bin/bash
-ls -ap | egrep "^\..*/$" | wc -l
+find . -name "*.js" -type f -delete
