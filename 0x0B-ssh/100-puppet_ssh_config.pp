@@ -1,15 +1,13 @@
-# practice using Puppet to make changes to our configuration file
-class ssh {
-  file { '/etc/ssh/sshd_config':
-    ensure => present,
-    owner => 'root',
-    group => 'root',
-    mode => '0644',
-    source => "puppet:///modules/ssh/sshd_config,${operatingsystem}",
-    notify => Service['ssh']
-  }
-  service { 'ssh':
-    ensure => 'running',
-    enable => 'true',
-  }
+#Creates Sets up client SSH configuration file
+file_line { 'ssh_config':
+    ensure   => present,
+    path     => '/etc/ssh/ssh_config',
+    line     => 'PasswordAuthentication no',
+    multiple => 'true'
+}
+file_line { 'ssh_config_2':
+    ensure   => present,
+    path     => '/etc/ssh/ssh_config',
+    line     => 'IdentityFile ~/.ssh/holberton',
+    multiple => 'true'
 }
