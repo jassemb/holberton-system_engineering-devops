@@ -1,6 +1,16 @@
 #!/usr/bin/env bash
-# Bash script that configures the container to fit the above requirements
+#Fixing the container so that Nginx is running as the nginx user.
+
+#kill process of ngnix if it is running 
+pkill nginx
+
+pkill apache2
+
+#Change permissions of config files
 chown nginx:nginx /etc/nginx/nginx.conf
 chmod 700 /etc/nginx/nginx.conf
-sed -i 's/80 default_server/8080 default_server/' /etc/nginx/sites-available/default
+
+#NGINX listen on port 8080
+sed -i 's/80/8080/' /etc/nginx/sites-enabled/default
+
 sudo -u nginx service nginx start
