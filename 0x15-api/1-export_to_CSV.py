@@ -1,22 +1,29 @@
 #!/usr/bin/python3
 """
-Uses https://jsonplaceholder.typicode.com along with an employee ID to
-return information about the employee's todo list progress
+export data in the CSV format
 """
-
-import csv
 import requests
-from sys import argv
+import sys
+import csv
 
 if __name__ == '__main__':
-    userId = argv[1]
-    user = requests.get("https://jsonplaceholder.typicode.com/users/{}".
-                        format(userId), verify=False).json()
-    todo = requests.get("https://jsonplaceholder.typicode.com/todos?userId={}".
-                        format(userId), verify=False).json()
-    with open("{}.csv".format(userId), 'w', newline='') as csvfile:
-        taskwriter = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
-        for task in todo:
-            taskwriter.writerow([int(userId), user.get('username'),
-                                 task.get('completed'),
-                                 task.get('title')])
+    employee_id = sys.argv[1]
+    url_todo = 'https://jsonplaceholder.typicode.com/todos/'
+    url_user = 'https://jsonplaceholder.typicode.com/users/'
+    todo = requests.get(url_todo, params={'user_id': employee_id})
+    user = requests.get(url_user, params={'id': employee_id})
+
+    todo_dict_list = todo.json()
+    user_dict_list = user.json()
+
+    employee = user_dict_list[0].get('username')
+
+    with open("{}.csv".format(employee_id), "w") as file:
+        writer = csv.writer(file, quoting=csv.QUOTE_ALL)
+        for task in todo_dict_list:
+            status = task['completed']
+            title = task['title']
+            writer.writerow(["{}".format(employee_id),
+                             "{}".format(employee),
+                             "{}".format(status),
+                             "{}".format(title)])
