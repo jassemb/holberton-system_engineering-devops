@@ -1,29 +1,35 @@
 #!/usr/bin/python3
 """
-Uses https://jsonplaceholder.typicode.com to return information about all
-employee's todo list progress
+ export data in the JSON format
 """
-
-import json
 import requests
+import json
 
 if __name__ == '__main__':
-    users = requests.get("https://jsonplaceholder.typicode.com/users",
-                         verify=False).json()
-    userdict = {}
-    usernamedict = {}
-    for user in users:
-        uid = user.get("id")
-        userdict[uid] = []
-        usernamedict[uid] = user.get("username")
-    todo = requests.get("https://jsonplaceholder.typicode.com/todos",
-                        verify=False).json()
-    for task in todo:
-        taskdict = {}
-        uid = task.get("userId")
-        taskdict["task"] = task.get('title')
-        taskdict["completed"] = task.get('completed')
-        taskdict["username"] = usernamedict.get(uid)
-        userdict.get(uid).append(taskdict)
-    with open("todo_all_employees.json", 'w') as jsonfile:
-        json.dump(userdict, jsonfile)
+    employee_id = 1
+    user_tasks = {}
+    url_todo = 'https://jsonplaceholder.typicode.com/todos/'
+    url_user = 'https://jsonplaceholder.typicode.com/users/'
+    users = requests.get(url_user).json()
+
+    for employee_id in range(1, len(users) + 1):
+        todo = requests.get(url_todo, params={'userId': employee_id})
+        user = requests.get(url_user, params={'id': employee_id})
+
+        todo_dict_list = todo.json()
+        user_dict_list = user.json()
+        task_list = []
+        employee = user_dict_list[0].get('username')
+
+        for task in todo_dict_list:
+            status = task.get('completed')
+            title = task.get('title')
+            task_dict = {}
+            task_dict['task'] = title
+            task_dict['completed'] = status
+            task_dict['username'] = employee
+            task_list.append(task_dict)
+        user_tasks[employee_id] = task_list
+
+    with open("todo_all_employees.json", "w") as jsonfile:
+        json.dump(user_tasks, jsonfile)
