@@ -1,28 +1,36 @@
 #!/usr/bin/python3
 """
-Uses https://jsonplaceholder.typicode.com along with an employee ID to
-return information about the employee's todo list progress
+Pings a To-Do API for data for a specified user and writes it to a JSON file
 """
 
-import json
 import requests
-from sys import argv
+import sys
+import csv
+import json
 
 if __name__ == '__main__':
-    userId = argv[1]
-    user = requests.get("https://jsonplaceholder.typicode.com/users/{}".
-                        format(userId), verify=False).json()
-    todo = requests.get("https://jsonplaceholder.typicode.com/todos?userId={}".
-                        format(userId), verify=False).json()
-    username = user.get('username')
-    tasks = []
-    for task in todo:
-        task_dict = {}
-        task_dict["task"] = task.get('title')
-        task_dict["completed"] = task.get('completed')
-        task_dict["username"] = username
-        tasks.append(task_dict)
-    jsonobj = {}
-    jsonobj[userId] = tasks
-    with open("{}.json".format(userId), 'w') as jsonfile:
-        json.dump(jsonobj, jsonfile)
+    employee_id = sys.argv[1]
+    url_todo = 'https://jsonplaceholder.typicode.com/todos/'
+    url_user = 'https://jsonplaceholder.typicode.com/users/'
+    todo = requests.get(url_todo, params={'user_id': employee_id})
+    user = requests.get(url_user, params={'id': employee_id})
+
+    todo_dict_list = todo.json()
+    user_dict_list = user.json()
+    task_list = []
+    user_tasks = {}
+    employee = user_dict_list[0].get('username')
+
+    with open("{}.json".format(employee_id), "w") as file:
+        for task in todo_dict_list:
+            status = task.get('completed')
+            title = task.get('title')
+            task_dict = {}
+            task_dict['task'] = title
+            task_dict['completed'] = status
+            task_dict['username'] = employee
+            task_list.append(task_dict)
+        user_tasks[employee_id] = task_list
+
+        data = json.dumps(user_tasks)
+        file.write(data)
